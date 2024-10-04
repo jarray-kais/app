@@ -2,6 +2,7 @@ import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { AuthService } from '../auth.service';
 import { Request } from 'express';
+import { request } from 'http';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -12,4 +13,5 @@ export class AuthGuard implements CanActivate {
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request: Request = context.switchToHttp().getRequest();
   }
+    const token = this.extractTokenFromHeader(request);
 }
