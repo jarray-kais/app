@@ -8,6 +8,6 @@ export class AppController {
 
   @Get()
   someProtectedRoute(@Req() req) {
-    return { message: 'Accessed Ressource', userId: req?.userId };
+    return { message: 'Accessed Ressource', userId: req?.user._id };
   }
 }
