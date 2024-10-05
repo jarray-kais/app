@@ -64,7 +64,7 @@ export class AuthService {
     console.log('Credentials are valid');
 
     // jeton avec les informations de l'utilisateur
-    const payload = { username: user.email, sub: user._id };
+    const payload = { username: user.email, _id: user._id };
     const access_token = this.jwtService.sign(payload);
 
     return {
