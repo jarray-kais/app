@@ -2,6 +2,8 @@ import { Controller, Post, Body } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { signupDto } from './dto/user.dto';
 import { loginDto } from './dto/login.dto';
+import { AuthGuard } from './guards/auth.guards';
+import { ChangePasswordDto } from './dto/changePassword.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -17,6 +19,21 @@ export class AuthController {
     return this.authService.validateAndLogin(
       loginData.email,
       loginData.password,
+    );
+  }
+
+  // POST /changepassword
+  @UseGuards(AuthGuard)
+  @Put('/changepassword')
+  async changePassword(
+    @Req() req,
+    @Body() changePasswordDto: ChangePasswordDto,
+  ) {
+    return this.authService.changePassword(
+      req?.user._id,
+
+      changePasswordDto.oldPassword,
+      changePasswordDto.newPassword,
     );
   }
 }
