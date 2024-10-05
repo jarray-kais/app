@@ -74,4 +74,27 @@ export class AuthService {
       access_token,
     };
   }
+
+  async changePassword(userId, oldPassword: string, newPassword: string) {
+    console.log(userId);
+    // find user
+    const user = await this.UserModel.findById(userId);
+    console.log(user);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+    // check old password
+    console.log(oldPassword);
+    console.log(user.password);
+    const passwordMatch = await bcrypt.compareSync(oldPassword, user.password);
+    if (!passwordMatch) {
+      throw new UnauthorizedException('Old password does not match');
+    }
+    // hash new password
+    const hashedPassword = await bcrypt.hashSync(newPassword, 10);
+    // update password
+    user.password = hashedPassword;
+    await user.save();
+    return 'Password updated successfully';
+  }
 }
