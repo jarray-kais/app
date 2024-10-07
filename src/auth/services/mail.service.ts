@@ -13,12 +13,12 @@ export class EmailService {
       },
     });
   }
-  async sendMail(to: string, subject: string, text: string, html?: string) {
+  async sendMail(to: string, subject: string, html?: string) {
     const mailOptions = {
       from: process.env.NODEJS_GMAIL_APP_USER, //sender address
       to, //recipients
       subject, //subject of the email
-      text, //plain text body of the email
+
       html, //html body of the email
     };
 
