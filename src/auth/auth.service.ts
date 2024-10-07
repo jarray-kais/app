@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -11,6 +12,7 @@ import { signupDto } from './dto/user.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { EmailService } from './services/mail.service';
+import { strict } from 'assert';
 
 @Injectable()
 export class AuthService {
@@ -156,5 +158,49 @@ export class AuthService {
       emailContent,
     );
     return { message: 'We have sent a password reset link to your email.' };
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<string> {
+    // Log the token for debugging (remove in production)
+    console.log('Reset token:', token);
+
+    // Verify the token
+    let decoded;
+    try {
+      decoded = this.jwtService.verify(token, {
+        secret: process.env.JWT_SECRET,
+      });
+    } catch {
+      throw new UnauthorizedException('Invalid or expired token');
+    }
+
+    // Find the user by resetToken and update the password
+    let user;
+    try {
+      user = await this.UserModel.findOneAndUpdate(
+        { resetToken: token },
+        { $set: { password: await bcrypt.hash(newPassword, 10) } },
+        { new: true }, // Return the updated document
+      );
+
+      if (!user) {
+        throw new NotFoundException('User not found with this reset token');
+      }
+    } catch {
+      throw new InternalServerErrorException('Failed to reset password');
+    }
+
+    // Remove the resetToken after the password change
+    try {
+      await this.UserModel.findOneAndUpdate(
+        { resetToken: token },
+        { $unset: { resetToken: '' } },
+        { strict: false },
+      );
+    } catch {
+      throw new InternalServerErrorException('Failed to remove reset token');
+    }
+
+    return 'Password reset successfully';
   }
 }
